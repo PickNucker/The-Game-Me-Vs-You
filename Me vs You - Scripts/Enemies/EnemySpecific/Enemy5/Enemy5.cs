@@ -1,0 +1,157 @@
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class Enemy5 : Entity
+{
+    #region StateMachine & Data
+    public E5_IdleState idleState { get; private set; }
+    public E5_WalkState walkState { get; private set; }
+    public E5_ChasePlayerState chasePlayerState { get; private set; }
+    public E5_SuspicionState suspicionState { get; private set; }
+    public E5_TargetingState targetingState { get; private set; }
+    public E5_MeleeAttack meeleAttackState { get; private set; }
+    public E5_MeleeAttack2 meeleAttackState2 { get; private set; }
+    public E5_MeleeAttack3 meeleAttackState3 { get; private set; }
+    public E5_GotHitState gotHitState { get; private set; }
+    public E5_DeadState deadState { get; private set; }
+
+    [SerializeField] D_IdleState idleStateData;
+    [SerializeField] D_WalkState walkStateData;
+    [SerializeField] D_ChasePlayerState chasePlayerStateData;
+    [SerializeField] D_SuspicionStateData suspicionStateData;
+    [SerializeField] D_BehaviourState targetingStateData;
+    [SerializeField] D_DeadState deadStateData;
+    #endregion
+
+    public bool isDead { get; private set; }
+
+    //Audio
+    [SerializeField] AudioTrigger footSteps = null;
+    [SerializeField] AudioTrigger swordHit = null;
+    [SerializeField] AudioTrigger swordHit2 = null;
+    [SerializeField] AudioTrigger daggerHit = null;
+    [SerializeField] AudioTrigger gettingHit = null;
+    [SerializeField] AudioTrigger deadSound = null;
+
+    float timer = 0;
+
+    int currentHitCounter = 0;
+
+    bool activate = false;
+    bool inAir = true;
+
+    public override void Awake()
+    {
+        base.Awake();
+
+        walkState = new E5_WalkState(this, stateMachine, animManager, walkStateData, this, "", "walk");
+        idleState = new E5_IdleState(this, stateMachine, animManager, idleStateData, this, "", "idle");
+        chasePlayerState = new E5_ChasePlayerState(this, stateMachine, animManager, chasePlayerStateData, this, "", "run");
+        suspicionState = new E5_SuspicionState(this, stateMachine, animManager, suspicionStateData, this, "", "sus");
+        targetingState = new E5_TargetingState(this, stateMachine, animManager, targetingStateData, this, "", "");
+        meeleAttackState = new E5_MeleeAttack(this, stateMachine, animManager, targetingStateData, this, "", "");
+        meeleAttackState2 = new E5_MeleeAttack2(this, stateMachine, animManager, targetingStateData, this, "", "");
+        meeleAttackState3 = new E5_MeleeAttack3(this, stateMachine, animManager, targetingStateData, this, "", "");
+        gotHitState = new E5_GotHitState(this, stateMachine, animManager, targetingStateData, this, "", "");
+        deadState = new E5_DeadState(this, stateMachine, animManager, deadStateData, this, "", "dead");
+
+        stateMachine.Initialize(idleState);
+    }
+
+
+
+    public override void Update()
+    {
+        base.Update();
+        HandleDeath();
+        HandleHit();
+        HandleAir();
+    }
+
+    public override void FixedUpdate()
+    {
+        base.FixedUpdate();
+        CheckIfIsGrounded();
+    }
+
+    void HandleDeath()
+    {
+        if (health.health <= 0)
+        {
+            isDead = true;
+            stateMachine.ChangeState(deadState);
+            Invoke(nameof(GetPlayerEXP), .1f);
+            return;
+        }
+    }
+
+    void HandleHit()
+    {
+        if (gotHit)
+        {
+            if (currentHitCounter > hitCounter && isGrounded)
+            {
+                if (timer >= targetingStateData.timerToGetHitable) currentHitCounter = 0;
+                timer += Time.deltaTime;
+            }
+            else
+            {
+                currentHitCounter++;
+                var effekt = Instantiate(hitEffekt, hitPos.position, Quaternion.identity);
+                effekt.transform.LookAt(Camera.main.transform.position);
+                Destroy(effekt, .5f);
+                stateMachine.ChangeState(gotHitState);
+            }
+        }
+    }
+
+    void HandleAir()
+    {
+        if (inAir)
+        {
+            //rigid.MovePosition(new Vector3(0, curveY.Evaluate(Time.time), 0));
+        }
+    }
+
+    void GetPlayerEXP()
+    {
+        if (!activate)
+        {
+            LevelSystem.instance.AddEXP(exp);
+            activate = true;
+        }
+    }
+
+    #region Audio
+    void FootSteps()
+    {
+        footSteps.Play(transform.position);
+    }
+
+    void Dead()
+    {
+        deadSound.Play(transform.position);
+    }
+
+    void SwordHit()
+    {
+        swordHit.Play(transform.position);
+    }
+
+    void SwordHit2()
+    {
+        swordHit2.Play(transform.position);
+    }
+
+    void SwordHit3()
+    {
+        daggerHit.Play(transform.position);
+    }
+
+    void GettingHit()
+    {
+        gettingHit.Play(transform.position);
+    }
+    #endregion
+}

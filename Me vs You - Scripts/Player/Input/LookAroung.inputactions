@@ -1,0 +1,44 @@
+{
+    "name": "LookAroung",
+    "maps": [
+        {
+            "name": "LookingAround",
+            "id": "5eaa56b2-1ab3-496d-960d-6784126b5b1a",
+            "actions": [
+                {
+                    "name": "Look",
+                    "type": "PassThrough",
+                    "id": "2c350a12-f29f-4b7e-861a-f9d52d372629",
+                    "expectedControlType": "Vector2",
+                    "processors": "",
+                    "interactions": ""
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "3e08e9f8-9b8a-43b2-b3e8-35a3b4dc839f",
+                    "path": "<Gamepad>/rightStick",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Look",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "914e30a5-95e1-449a-af2c-e4c5e5573f36",
+                    "path": "<Mouse>/delta",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Look",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
+        }
+    ],
+    "controlSchemes": []
+}
